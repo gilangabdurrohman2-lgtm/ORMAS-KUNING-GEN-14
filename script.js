@@ -43,123 +43,133 @@ document.addEventListener("DOMContentLoaded", function () {
     photo.replaceWith(photoLink);
   });
 
-  // Each program card opens the shared example juknis PDF in an accessible dialog.
-  const juknisUrl = "dokumen/contoh-juknis.pdf";
-  const programCards = document.querySelectorAll(".program-card");
+  // Keep the program cards as informational cards; portfolio cards form the gallery.
+  const portfolioCards = Array.from(document.querySelectorAll(".portfolio-card"));
+  const galleryImages = [
+    {
+      src: "mantap/DSC00852.JPG",
+      alt: "Dokumentasi kegiatan PiKIR"
+    },
+    {
+      src: "mantap/DSC05908.JPG",
+      alt: "Dokumentasi kegiatan dan proyek PiKIR"
+    },
+    {
+      src: "mantap/Screenshot%202026-11-16%20103637.png",
+      alt: "Dokumentasi portofolio PiKIR"
+    },
+    {
+      src: "WIN_20260422_09_02_07_Pro.jpg",
+      alt: "Foto kegiatan PiKIR"
+    }
+  ];
 
-  if (programCards.length) {
-    const dialogStyles = document.createElement("style");
-    dialogStyles.textContent = `
-      .juknis-dialog {
-        width: min(920px, calc(100% - 32px));
-        max-width: none;
-        max-height: min(90vh, 900px);
-        padding: 0;
-        border: 0;
-        border-radius: 20px;
-        color: #1a2437;
-        box-shadow: 0 24px 80px rgba(0, 0, 0, .3);
-      }
-      .juknis-dialog::backdrop { background: rgba(8, 20, 40, .72); }
-      .juknis-dialog-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 18px 22px;
-        background: #fffaf1;
-        border-bottom: 1px solid #e7dcc0;
-      }
-      .juknis-dialog-header h2 { margin: 0; font-size: 1.15rem; }
-      .juknis-dialog-actions { display: flex; align-items: center; gap: 12px; }
-      .juknis-open-link { color: #0e2245; font-weight: 700; }
-      .juknis-close {
-        border: 0;
-        border-radius: 10px;
-        padding: 9px 13px;
-        background: #0e2245;
-        color: #fff;
-        font: inherit;
-        font-weight: 700;
-        cursor: pointer;
-      }
-      .juknis-frame { display: block; width: 100%; height: min(72vh, 760px); border: 0; background: #f3f4f6; }
-      .juknis-fallback { margin: 0; padding: 12px 20px; color: #58677b; font-size: .9rem; }
-      .program-card { cursor: pointer; }
-      .program-card:focus-visible { outline: 3px solid #dca81f; outline-offset: 4px; }
-      .program-open-hint { display: inline-block; margin-top: 16px; color: #0e2245; font-weight: 800; }
+  if (portfolioCards.length) {
+    const galleryStyles = document.createElement("style");
+    galleryStyles.textContent = `
+      .portfolio-card { cursor: zoom-in; transition: transform .2s ease, box-shadow .2s ease; }
+      .portfolio-card:hover { transform: translateY(-4px); box-shadow: 0 24px 42px rgba(14, 34, 69, .16); }
+      .portfolio-card:focus-visible { outline: 3px solid #dca81f; outline-offset: 4px; }
+      .portfolio-gallery-image { display: block; width: 100%; height: 210px; margin: 0 0 20px; object-fit: cover; border-radius: 16px; background: #f3f4f6; }
+      .portfolio-gallery-hint { display: inline-block; margin-top: 16px; color: #0e2245; font-weight: 800; }
+      .portfolio-lightbox { width: min(1000px, calc(100% - 32px)); max-width: none; max-height: 92vh; padding: 18px; border: 0; border-radius: 20px; color: #fff; background: #0d1d36; box-shadow: 0 24px 80px rgba(0,0,0,.4); }
+      .portfolio-lightbox::backdrop { background: rgba(8, 20, 40, .82); }
+      .portfolio-lightbox-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+      .portfolio-lightbox-title { margin: 0; font-size: 1.1rem; }
+      .portfolio-lightbox-close, .portfolio-lightbox-nav { border: 0; border-radius: 10px; padding: 10px 14px; color: #0e2245; background: #fffaf1; font: inherit; font-weight: 800; cursor: pointer; }
+      .portfolio-lightbox-stage { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; }
+      .portfolio-lightbox-image { display: block; width: 100%; height: min(70vh, 680px); object-fit: contain; }
+      .portfolio-lightbox-count { margin: 12px 0 0; text-align: center; color: rgba(255,255,255,.75); font-size: .9rem; }
       @media (max-width: 600px) {
-        .juknis-dialog-header { align-items: flex-start; padding: 14px; }
-        .juknis-dialog-actions { gap: 8px; }
-        .juknis-open-link { font-size: .85rem; }
-        .juknis-frame { height: 68vh; }
+        .portfolio-lightbox { padding: 12px; }
+        .portfolio-lightbox-stage { gap: 6px; }
+        .portfolio-lightbox-nav { padding: 9px; }
+        .portfolio-lightbox-image { height: 62vh; }
       }
     `;
-    document.head.append(dialogStyles);
+    document.head.append(galleryStyles);
 
     const dialog = document.createElement("dialog");
-    dialog.className = "juknis-dialog";
-    dialog.setAttribute("aria-labelledby", "juknis-dialog-title");
+    dialog.className = "portfolio-lightbox";
+    dialog.setAttribute("aria-label", "Galeri portofolio PiKIR");
     dialog.innerHTML = `
-      <div class="juknis-dialog-header">
-        <h2 id="juknis-dialog-title">Contoh Juknis Program</h2>
-        <div class="juknis-dialog-actions">
-          <a class="juknis-open-link" href="${juknisUrl}" target="_blank" rel="noopener noreferrer">Buka PDF ↗</a>
-          <button class="juknis-close" type="button" aria-label="Tutup PDF">Tutup</button>
-        </div>
+      <div class="portfolio-lightbox-header">
+        <h2 class="portfolio-lightbox-title"></h2>
+        <button class="portfolio-lightbox-close" type="button" aria-label="Tutup galeri">Tutup ✕</button>
       </div>
-      <iframe class="juknis-frame" title="Pratinjau PDF contoh juknis"></iframe>
-      <p class="juknis-fallback">Jika PDF belum tampil, pastikan file contoh juknis tersedia di <strong>${juknisUrl}</strong>, lalu coba buka PDF di tab baru.</p>
+      <div class="portfolio-lightbox-stage">
+        <button class="portfolio-lightbox-nav portfolio-gallery-previous" type="button" aria-label="Foto sebelumnya">‹</button>
+        <img class="portfolio-lightbox-image" alt="">
+        <button class="portfolio-lightbox-nav portfolio-gallery-next" type="button" aria-label="Foto berikutnya">›</button>
+      </div>
+      <p class="portfolio-lightbox-count" aria-live="polite"></p>
     `;
     document.body.append(dialog);
 
-    const pdfFrame = dialog.querySelector(".juknis-frame");
-    const closeButton = dialog.querySelector(".juknis-close");
-    const openLink = dialog.querySelector(".juknis-open-link");
+    const lightboxImage = dialog.querySelector(".portfolio-lightbox-image");
+    const lightboxTitle = dialog.querySelector(".portfolio-lightbox-title");
+    const lightboxCount = dialog.querySelector(".portfolio-lightbox-count");
+    let currentImage = 0;
 
-    function openJuknis(card) {
-      const programName = card.querySelector("h3")?.textContent.trim() || "Program PiKIR";
-      dialog.querySelector("#juknis-dialog-title").textContent = "Contoh Juknis — " + programName;
-      pdfFrame.src = juknisUrl;
+    function showGalleryImage(index) {
+      currentImage = (index + galleryImages.length) % galleryImages.length;
+      const image = galleryImages[currentImage];
+      lightboxImage.src = image.src;
+      lightboxImage.alt = image.alt;
+      lightboxTitle.textContent = portfolioCards[currentImage % portfolioCards.length]
+        .querySelector("h3")?.textContent.trim() || "Portofolio PiKIR";
+      lightboxCount.textContent = (currentImage + 1) + " / " + galleryImages.length;
+    }
+
+    function openGallery(index) {
+      showGalleryImage(index);
       dialog.showModal();
     }
 
-    programCards.forEach(function (card) {
-      card.tabIndex = 0;
-      card.setAttribute("role", "button");
-      card.setAttribute("aria-label", "Buka contoh juknis PDF: " + (card.querySelector("h3")?.textContent.trim() || "Program"));
+    portfolioCards.forEach(function (card, index) {
+      const image = document.createElement("img");
+      image.className = "portfolio-gallery-image";
+      image.src = galleryImages[index % galleryImages.length].src;
+      image.alt = galleryImages[index % galleryImages.length].alt;
+      image.loading = "lazy";
+      card.prepend(image);
 
       const hint = document.createElement("span");
-      hint.className = "program-open-hint";
-      hint.textContent = "Lihat contoh juknis PDF →";
-      hint.setAttribute("aria-hidden", "true");
+      hint.className = "portfolio-gallery-hint";
+      hint.textContent = "Buka galeri foto →";
       card.append(hint);
-
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", "Buka galeri: " + (card.querySelector("h3")?.textContent.trim() || "Portofolio"));
       card.addEventListener("click", function () {
-        openJuknis(card);
+        openGallery(index);
       });
       card.addEventListener("keydown", function (event) {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          openJuknis(card);
+          openGallery(index);
         }
       });
     });
 
-    closeButton.addEventListener("click", function () {
+    dialog.querySelector(".portfolio-lightbox-close").addEventListener("click", function () {
       dialog.close();
+    });
+    dialog.querySelector(".portfolio-gallery-previous").addEventListener("click", function () {
+      showGalleryImage(currentImage - 1);
+    });
+    dialog.querySelector(".portfolio-gallery-next").addEventListener("click", function () {
+      showGalleryImage(currentImage + 1);
     });
     dialog.addEventListener("click", function (event) {
       if (event.target === dialog) dialog.close();
     });
-    dialog.addEventListener("close", function () {
-      pdfFrame.src = "about:blank";
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowLeft") showGalleryImage(currentImage - 1);
+      if (event.key === "ArrowRight") showGalleryImage(currentImage + 1);
     });
-    openLink.addEventListener("click", function () {
-      // Keep the PDF available in the dialog while opening the separate tab.
-      window.setTimeout(function () {
-        if (dialog.open) pdfFrame.src = juknisUrl;
-      }, 0);
+    dialog.addEventListener("close", function () {
+      lightboxImage.removeAttribute("src");
     });
   }
 
