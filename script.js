@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
       alt: "Dokumentasi portofolio PiKIR"
     },
     {
-      src: "WIN_20260422_09_02_07_Pro.jpg",
+      src: "mantap/Screenshot%202026-11-16%20103637.png",
       alt: "Foto kegiatan PiKIR"
     }
   ];
