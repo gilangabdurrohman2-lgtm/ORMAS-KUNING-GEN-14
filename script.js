@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (toggleButton && navMenu) {
     toggleButton.addEventListener("click", function () {
-      navMenu.classList.toggle("show");
+      const isOpen = navMenu.classList.toggle("show");
+      toggleButton.setAttribute("aria-expanded", String(isOpen));
     });
   }
 
@@ -39,62 +40,116 @@ document.addEventListener("DOMContentLoaded", function () {
     photoLink.title = "Klik untuk membuka foto ukuran penuh";
     photoLink.style.display = "block";
     photoLink.style.cursor = "zoom-in";
-
     photo.replaceWith(photoLink);
   });
 
-  // Keep the program cards as informational cards; portfolio cards form the gallery.
-  const portfolioCards = Array.from(document.querySelectorAll(".portfolio-card"));
-  const galleryImages = [
+  // Portfolio gallery styled as a compact editorial photo grid.
+  const portfolioGrid = document.querySelector(".portfolio-grid");
+  const galleryItems = [
     {
+      category: "Kegiatan",
+      filter: "kegiatan",
+      title: "Dokumentasi Kegiatan PiKIR",
       src: "mantap/DSC00852.JPG",
       alt: "Dokumentasi kegiatan PiKIR"
     },
     {
+      category: "Inovasi",
+      filter: "inovasi",
+      title: "Proyek dan Karya Inovatif",
       src: "mantap/DSC05908.JPG",
-      alt: "Dokumentasi kegiatan dan proyek PiKIR"
+      alt: "Dokumentasi proyek dan karya inovatif PiKIR"
     },
     {
+      category: "Galeri",
+      filter: "galeri",
+      title: "Momen Bersama PiKIR",
       src: "mantap/Screenshot%202026-11-16%20103637.png",
       alt: "Dokumentasi portofolio PiKIR"
     },
     {
-      src: "mantap/Screenshot%202026-11-16%20103637.png",
-      alt: "Foto kegiatan PiKIR"
+      category: "Riset",
+      filter: "riset",
+      title: "Eksplorasi Ide dan Riset",
+      src: "mantap/DSC00852.JPG",
+      alt: "Kegiatan riset dan eksplorasi ide PiKIR"
     }
   ];
 
-  if (portfolioCards.length) {
-    const galleryStyles = document.createElement("style");
-    galleryStyles.textContent = `
-      .portfolio-card { cursor: zoom-in; transition: transform .2s ease, box-shadow .2s ease; }
-      .portfolio-card:hover { transform: translateY(-4px); box-shadow: 0 24px 42px rgba(14, 34, 69, .16); }
-      .portfolio-card:focus-visible { outline: 3px solid #dca81f; outline-offset: 4px; }
-      .portfolio-gallery-image { display: block; width: 100%; height: 210px; margin: 0 0 20px; object-fit: cover; border-radius: 16px; background: #f3f4f6; }
-      .portfolio-gallery-hint { display: inline-block; margin-top: 16px; color: #0e2245; font-weight: 800; }
-      .portfolio-lightbox { width: min(1000px, calc(100% - 32px)); max-width: none; max-height: 92vh; padding: 18px; border: 0; border-radius: 20px; color: #fff; background: #0d1d36; box-shadow: 0 24px 80px rgba(0,0,0,.4); }
-      .portfolio-lightbox::backdrop { background: rgba(8, 20, 40, .82); }
-      .portfolio-lightbox-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
-      .portfolio-lightbox-title { margin: 0; font-size: 1.1rem; }
-      .portfolio-lightbox-close, .portfolio-lightbox-nav { border: 0; border-radius: 10px; padding: 10px 14px; color: #0e2245; background: #fffaf1; font: inherit; font-weight: 800; cursor: pointer; }
-      .portfolio-lightbox-stage { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; }
-      .portfolio-lightbox-image { display: block; width: 100%; height: min(70vh, 680px); object-fit: contain; }
-      .portfolio-lightbox-count { margin: 12px 0 0; text-align: center; color: rgba(255,255,255,.75); font-size: .9rem; }
-      @media (max-width: 600px) {
-        .portfolio-lightbox { padding: 12px; }
-        .portfolio-lightbox-stage { gap: 6px; }
-        .portfolio-lightbox-nav { padding: 9px; }
-        .portfolio-lightbox-image { height: 62vh; }
-      }
+  if (portfolioGrid) {
+    const section = portfolioGrid.closest("#portfolio");
+    const heading = section?.querySelector(".section-heading");
+    const eyebrow = heading?.querySelector(".eyebrow");
+    const title = heading?.querySelector("h2");
+    if (eyebrow) eyebrow.textContent = "Portofolio PiKIR";
+    if (title) title.textContent = "MOMEN BERKARYA";
+    if (heading) {
+      const description = document.createElement("p");
+      description.className = "portfolio-intro";
+      description.textContent = "Sekilas perjalanan kegiatan, riset, dan inovasi PiKIR.";
+      heading.append(description);
+    }
+
+    const filters = document.createElement("div");
+    filters.className = "portfolio-filters";
+    filters.setAttribute("role", "group");
+    filters.setAttribute("aria-label", "Filter galeri portofolio");
+    filters.innerHTML = `
+      <button class="portfolio-filter is-active" type="button" data-filter="all" aria-pressed="true">Semua</button>
+      <button class="portfolio-filter" type="button" data-filter="riset" aria-pressed="false">Riset</button>
+      <button class="portfolio-filter" type="button" data-filter="inovasi" aria-pressed="false">Inovasi</button>
+      <button class="portfolio-filter" type="button" data-filter="kegiatan" aria-pressed="false">Kegiatan</button>
+      <button class="portfolio-filter" type="button" data-filter="galeri" aria-pressed="false">Galeri</button>
     `;
-    document.head.append(galleryStyles);
+    portfolioGrid.before(filters);
+    portfolioGrid.replaceChildren();
+
+    galleryItems.forEach(function (item, index) {
+      const card = document.createElement("button");
+      card.className = "portfolio-card";
+      card.type = "button";
+      card.dataset.category = item.filter;
+      card.setAttribute("aria-label", "Buka foto: " + item.title);
+
+      const image = document.createElement("img");
+      image.className = "portfolio-card-image";
+      image.src = item.src;
+      image.alt = item.alt;
+      image.loading = "lazy";
+
+      const caption = document.createElement("span");
+      caption.className = "portfolio-card-caption";
+      caption.innerHTML = `<span class="portfolio-card-category"></span><span class="portfolio-card-title"></span>`;
+      caption.querySelector(".portfolio-card-category").textContent = item.category;
+      caption.querySelector(".portfolio-card-title").textContent = item.title;
+      card.append(image, caption);
+      portfolioGrid.append(card);
+      card.addEventListener("click", function () {
+        openGallery(index);
+      });
+    });
+
+    filters.addEventListener("click", function (event) {
+      const button = event.target.closest(".portfolio-filter");
+      if (!button) return;
+
+      filters.querySelectorAll(".portfolio-filter").forEach(function (filterButton) {
+        const active = filterButton === button;
+        filterButton.classList.toggle("is-active", active);
+        filterButton.setAttribute("aria-pressed", String(active));
+      });
+
+      portfolioGrid.querySelectorAll(".portfolio-card").forEach(function (card) {
+        card.hidden = button.dataset.filter !== "all" && card.dataset.category !== button.dataset.filter;
+      });
+    });
 
     const dialog = document.createElement("dialog");
     dialog.className = "portfolio-lightbox";
-    dialog.setAttribute("aria-label", "Galeri portofolio PiKIR");
+    dialog.setAttribute("aria-label", "Galeri foto PiKIR");
     dialog.innerHTML = `
       <div class="portfolio-lightbox-header">
-        <h2 class="portfolio-lightbox-title"></h2>
+        <p class="portfolio-lightbox-title"></p>
         <button class="portfolio-lightbox-close" type="button" aria-label="Tutup galeri">Tutup ✕</button>
       </div>
       <div class="portfolio-lightbox-stage">
@@ -112,45 +167,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentImage = 0;
 
     function showGalleryImage(index) {
-      currentImage = (index + galleryImages.length) % galleryImages.length;
-      const image = galleryImages[currentImage];
-      lightboxImage.src = image.src;
-      lightboxImage.alt = image.alt;
-      lightboxTitle.textContent = portfolioCards[currentImage % portfolioCards.length]
-        .querySelector("h3")?.textContent.trim() || "Portofolio PiKIR";
-      lightboxCount.textContent = (currentImage + 1) + " / " + galleryImages.length;
+      currentImage = (index + galleryItems.length) % galleryItems.length;
+      const item = galleryItems[currentImage];
+      lightboxImage.src = item.src;
+      lightboxImage.alt = item.alt;
+      lightboxTitle.textContent = item.title;
+      lightboxCount.textContent = (currentImage + 1) + " / " + galleryItems.length;
     }
 
     function openGallery(index) {
       showGalleryImage(index);
       dialog.showModal();
     }
-
-    portfolioCards.forEach(function (card, index) {
-      const image = document.createElement("img");
-      image.className = "portfolio-gallery-image";
-      image.src = galleryImages[index % galleryImages.length].src;
-      image.alt = galleryImages[index % galleryImages.length].alt;
-      image.loading = "lazy";
-      card.prepend(image);
-
-      const hint = document.createElement("span");
-      hint.className = "portfolio-gallery-hint";
-      hint.textContent = "Buka galeri foto →";
-      card.append(hint);
-      card.tabIndex = 0;
-      card.setAttribute("role", "button");
-      card.setAttribute("aria-label", "Buka galeri: " + (card.querySelector("h3")?.textContent.trim() || "Portofolio"));
-      card.addEventListener("click", function () {
-        openGallery(index);
-      });
-      card.addEventListener("keydown", function (event) {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          openGallery(index);
-        }
-      });
-    });
 
     dialog.querySelector(".portfolio-lightbox-close").addEventListener("click", function () {
       dialog.close();
@@ -174,7 +202,5 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   const yearEl = document.getElementById("year");
-  if (yearEl) {
-    yearEl.textContent = new Date().getFullYear();
-  }
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 });
