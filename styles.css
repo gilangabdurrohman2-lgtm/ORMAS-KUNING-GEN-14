@@ -253,6 +253,8 @@ img {
   box-shadow: 0 32px 60px rgba(14, 34, 69, 0.24);
   position: relative;
   z-index: 2;
+  animation: hero-card-float 6s ease-in-out infinite;
+  will-change: transform;
 }
 
 .visual-card::before {
@@ -263,6 +265,7 @@ img {
   height: 170px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .badge {
@@ -324,6 +327,8 @@ img {
   padding: 16px 18px;
   min-width: 200px;
   z-index: 3;
+  animation: hero-badge-float 4.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 .mini-icon {
@@ -348,6 +353,21 @@ img {
   color: var(--muted);
   font-size: 0.8rem;
   line-height: 1.4;
+}
+
+@keyframes hero-card-float {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+
+@keyframes hero-badge-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+.hero-visual:hover .visual-card,
+.hero-visual:hover .floating-box {
+  animation-play-state: paused;
 }
 
 .section {
@@ -777,5 +797,22 @@ img {
 
   .stats {
     gap: 18px;
+  }
+
+  .hero-visual {
+    min-height: 420px;
+  }
+
+  .floating-box {
+    right: 0;
+    bottom: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .visual-card,
+  .floating-box {
+    animation: none;
+    will-change: auto;
   }
 }
